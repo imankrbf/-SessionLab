@@ -16,7 +16,7 @@ from utils import hash_password
 
 from database import engine, Base, SessionLocal
 from models import User, SessionData
-from routers import vulnerable, secure
+from routers import vulnerable, secure, hacker
 
 
 @asynccontextmanager
@@ -45,13 +45,16 @@ async def lifespan(app: FastAPI):
         db.close()
     
     print("=" * 50)
-    print("🔐 آزمایشگاه امنیت نشست")
+    print("🔐 آزمایشگاه امنیت نشست - Version 2.0")
     print("=" * 50)
     print("📌 نسخه آسیب‌پذیر: http://localhost:8000/vulnerable/login")
     print("📌 نسخه امن: http://localhost:8000/secure/login")
+    print("📌 پنل مهاجم: http://localhost:8000/hacker/dashboard")
     print("=" * 50)
     print("🎯 تست حمله Session Fixation:")
     print("   http://localhost:8000/vulnerable/login?token=HACKER_TOKEN_123")
+    print("🎯 تست حمله XSS:")
+    print("   http://localhost:8000/vulnerable/xss-demo")
     print("=" * 50)
     
     yield
@@ -64,13 +67,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="آزمایشگاه امنیت نشست",
     description="نمایش آسیب‌پذیری Session Fixation و راه‌حل Session Regeneration",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan
 )
 
 # Include routers
 app.include_router(vulnerable.router)
 app.include_router(secure.router)
+app.include_router(hacker.router)
 
 # Templates for home page
 templates = Jinja2Templates(directory="templates")
