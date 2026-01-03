@@ -38,7 +38,7 @@
 
 ```bash
 # 1. ورود به پوشه پروژه
-cd "d:\iman\tmp\test prefect"
+
 
 # 2. ایجاد محیط مجازی (اختیاری ولی توصیه می‌شود)
 python -m venv venv
