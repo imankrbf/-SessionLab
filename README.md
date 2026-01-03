@@ -1,4 +1,4 @@
-# 🔐 آزمایشگاه امنیت نشست (Session Security Lab)
+#  آزمایشگاه امنیت نشست (Session Security Lab)
 
 یک پروژه آموزشی برای نمایش آسیب‌پذیری **Session Fixation** و راه‌حل **Session Regeneration** با استفاده از FastAPI.
 
