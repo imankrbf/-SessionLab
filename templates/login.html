@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}ورود | آزمایشگاه امنیت نشست{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card-glass-light p-5">
+            <!-- Mode Indicator -->
+            <div class="text-center mb-4">
+                <div class="icon-circle">
+                    {% if mode == "vulnerable" %}
+                    ⚠️
+                    {% else %}
+                    ✅
+                    {% endif %}
+                </div>
+                <span class="mode-badge">{{ mode_label }}</span>
+            </div>
+
+            <!-- Warning/Info Box -->
+            {% if mode == "vulnerable" %}
+            <div class="warning-box text-center">
+                <strong>⚠️ هشدار:</strong> این نسخه دارای آسیب‌پذیری Session Fixation است!
+                <br>
+                <small>توکن‌های URL بدون بررسی پذیرفته می‌شوند.</small>
+            </div>
+            {% else %}
+            <div class="success-box text-center">
+                <strong>✅ امن:</strong> این نسخه از Session Regeneration استفاده می‌کند.
+                <br>
+                <small>توکن‌های URL نادیده گرفته می‌شوند.</small>
+            </div>
+            {% endif %}
+
+            <h3 class="text-center mb-4">ورود به سیستم</h3>
+
+            <!-- Error Message -->
+            {% if error %}
+            <div class="alert alert-danger text-center">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <!-- Token Info (for demonstration) -->
+            {% if token %}
+            <div class="alert alert-warning">
+                <strong>🎯 توکن دریافت شده:</strong>
+                <code style="direction: ltr;">{{ token }}</code>
+                <br>
+                <small>این توکن از URL خوانده شده و به عنوان Session ID استفاده خواهد شد!</small>
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="POST" action="/{{ mode }}/login">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">نام کاربری</label>
+                    <input type="text" name="username" class="form-control form-control-custom"
+                        placeholder="نام کاربری را وارد کنید" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">رمز عبور</label>
+                    <input type="password" name="password" class="form-control form-control-custom"
+                        placeholder="رمز عبور را وارد کنید" required>
+                </div>
+
+                <button type="submit" class="btn btn-custom text-white w-100">
+                    ورود
+                </button>
+            </form>
+
+            <!-- Register Link -->
+            <div class="mt-4 p-3 bg-light rounded-3 text-center">
+                <small class="text-muted">
+                    حساب کاربری ندارید؟
+                    <br>
+                    <a href="/{{ mode }}/register" class="fw-bold">ثبت‌نام کنید</a>
+                </small>
+            </div>
+
+            <!-- Demo Credentials -->
+            <div class="mt-3 p-3 bg-light rounded-3 text-center">
+                <small class="text-muted">
+                    <strong>اطلاعات ورود نمایشی:</strong>
+                    <br>
+                    نام کاربری: <code>admin</code>
+                    <br>
+                    رمز عبور: <code>123456</code>
+                </small>
+            </div>
+
+            <!-- Mode Switcher -->
+            <div class="mt-4 text-center">
+                {% if mode == "vulnerable" %}
+                <a href="/secure/login" class="btn btn-outline-success">
+                    🔄 رفتن به نسخه امن
+                </a>
+                {% else %}
+                <a href="/vulnerable/login" class="btn btn-outline-danger">
+                    🔄 رفتن به نسخه آسیب‌پذیر
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

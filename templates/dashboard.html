@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد | آزمایشگاه امنیت نشست{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card-glass-light p-5">
+            <!-- Mode Indicator -->
+            <div class="text-center mb-4">
+                <div class="icon-circle">
+                    {% if mode == "vulnerable" %}
+                    ⚠️
+                    {% else %}
+                    ✅
+                    {% endif %}
+                </div>
+                <span class="mode-badge">{{ mode_label }}</span>
+            </div>
+
+            <!-- Welcome Message -->
+            <div class="text-center mb-5">
+                <h2 class="mb-2">سلام {{ username }} 👋</h2>
+                <p class="text-muted">به داشبورد خود خوش آمدید</p>
+            </div>
+
+            <!-- Warning/Success Box -->
+            {% if mode == "vulnerable" %}
+            <div class="warning-box">
+                <div class="d-flex align-items-center">
+                    <span class="fs-3 me-3">⚠️</span>
+                    <div>
+                        <strong>این نشست آسیب‌پذیر است!</strong>
+                        <br>
+                        <small>شناسه نشست ممکن است توسط مهاجم تنظیم شده باشد.</small>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="success-box">
+                <div class="d-flex align-items-center">
+                    <span class="fs-3 me-3">✅</span>
+                    <div>
+                        <strong>این نشست امن است!</strong>
+                        <br>
+                        <small>شناسه نشست پس از ورود مجدداً تولید شده است.</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Session ID Display -->
+            <div class="mb-4">
+                <h5 class="mb-3">
+                    🔑 شناسه نشست فعلی شما:
+                </h5>
+                <div class="session-id-box">
+                    {{ session_id }}
+                </div>
+                <small class="text-muted mt-2 d-block">
+                    {% if mode == "vulnerable" %}
+                    ⚠️ اگر این شناسه همان توکنی است که در URL بود، حمله Session Fixation موفق بوده است!
+                    {% else %}
+                    ✅ این شناسه به صورت تصادفی و امن تولید شده است.
+                    {% endif %}
+                </small>
+            </div>
+
+            <!-- Session Info Card -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="p-4 bg-light rounded-3 h-100">
+                        <h6 class="text-muted mb-2">👤 کاربر فعلی</h6>
+                        <h4>{{ username }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 bg-light rounded-3 h-100">
+                        <h6 class="text-muted mb-2">🛡️ وضعیت امنیت</h6>
+                        <h4>
+                            {% if mode == "vulnerable" %}
+                            <span class="text-danger">آسیب‌پذیر</span>
+                            {% else %}
+                            <span class="text-success">امن</span>
+                            {% endif %}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explanation -->
+            <div class="p-4 border rounded-3 mb-4">
+                <h5 class="mb-3">📚 توضیحات</h5>
+                {% if mode == "vulnerable" %}
+                <p>
+                    در این نسخه آسیب‌پذیر، سرور اجازه می‌دهد که شناسه نشست از طریق URL تنظیم شود.
+                    <br><br>
+                    <strong>سناریوی حمله:</strong>
+                <ol>
+                    <li>مهاجم لینک <code>http://localhost:8000/vulnerable/login?token=EVIL_TOKEN</code> را به قربانی
+                        ارسال می‌کند.</li>
+                    <li>قربانی وارد سیستم می‌شود.</li>
+                    <li>مهاجم با تنظیم کوکی <code>EVIL_TOKEN</code> به داشبورد قربانی دسترسی پیدا می‌کند!</li>
+                </ol>
+                </p>
+                {% else %}
+                <p>
+                    در این نسخه امن، سرور هرگونه توکن ارائه شده در URL را نادیده می‌گیرد.
+                    <br><br>
+                    <strong>راه‌حل امن (Session Regeneration):</strong>
+                <ol>
+                    <li>پس از ورود موفق، یک شناسه نشست جدید و تصادفی تولید می‌شود.</li>
+                    <li>کوکی با پرچم‌های امنیتی <code>HttpOnly</code> و <code>SameSite</code> تنظیم می‌شود.</li>
+                    <li>حتی اگر مهاجم توکنی تنظیم کرده باشد، پس از ورود کاربر جایگزین می‌شود.</li>
+                </ol>
+                </p>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="{{ logout_url }}" class="btn btn-outline-secondary px-4">
+                    🚪 خروج
+                </a>
+                {% if mode == "vulnerable" %}
+                <a href="/secure/login" class="btn btn-success px-4">
+                    🔄 رفتن به نسخه امن
+                </a>
+                {% else %}
+                <a href="/vulnerable/login" class="btn btn-danger px-4">
+                    🔄 رفتن به نسخه آسیب‌پذیر
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
